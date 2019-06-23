@@ -118,4 +118,100 @@ int init_serial(int fd,int nSpeed, int nBits, char nEvent, int nStop)
     
     return 0;  
 }  
+char * get_gprmc (char * buf)
+{
+    char *buff=buf;
+    char *target="$GPRMC";
+    char *p=NULL;
+                
+    if((p=strstr(buff,target))==NULL)
+    {
+        printf("No fonud the string GPRMC\n");
+        return 0;
+    }
+    return p;
+}
+char * get_gpgga (char * buf)
+{
+    char *buff=buf;
+    char *target="$GPGGA";
+    char *p=NULL;
+                
+    if((p=strstr(buff,target))==NULL)
+    {
+        printf("No fonud the string GPGGA\n");
+        return 0;
+    }
+    return p;
+}
+static int getcomma(int num,char *str)
+{
+    int i,j=0;
+    int len=strlen(str);
+    for(i=0;i<len;i++)
+    {
+        if(str[i]==',')j++;
+        if(j==num)return i+1; 
+    }
+    return 0;
+}
+static double get_double_number(char *s)
+{
+    char buf[BUF_SIZE];
+    int i;
+    double rev;
+    i=getcomma(1,s);   
+    strncpy(buf,s,i);
+    buf[i]=0;         
+    rev=atof(buf);   
+    return rev;
+}
+static void UTC2BTC(date_time *GPS)  
+{  
+
+        GPS->second++; 
+        if(GPS->second>59){  
+            GPS->second=0;  
+            GPS->minute++;  
+            if(GPS->minute>59){  
+                GPS->minute=0;  
+                GPS->hour++;  
+            }  
+        }     
+  
+        GPS->hour+=8;          
+        if(GPS->hour>23)  
+        {  
+            GPS->hour-=24;  
+            GPS->day+=1;  
+            if(GPS->month==2 ||GPS->month==4 ||GPS->month==6 ||GPS->month==9 ||GPS->month==11 ){  
+                if(GPS->day>30){          
+                    GPS->day=1;  
+                    GPS->month++;  
+                }  
+            }  
+            else{  
+                if(GPS->day>31){          
+                    GPS->day=1;  
+                    GPS->month++;  
+                }  
+            }  
+            if(GPS->year % 4 == 0 ){ 
+                if(GPS->day > 29 && GPS->month ==2){       
+                    GPS->day=1;  
+                    GPS->month++;  
+                }  
+            }  
+            else{  
+                if(GPS->day>28 &&GPS->month ==2){      
+                    GPS->day=1;  
+                    GPS->month++;  
+                }  
+            }  
+            if(GPS->month>12){  
+                GPS->month-=12;  
+                GPS->year++;  
+            }         
+        }  
+} 
 
