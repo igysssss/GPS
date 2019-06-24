@@ -5,7 +5,6 @@
 #include<sys/stat.h>  
 #include<fcntl.h>  
 #include<unistd.h>  
-#include<termios.h>  
 #include<string.h>  
 #define BUF_SIZE 1024
 typedef struct{
@@ -214,4 +213,28 @@ static void UTC2BTC(date_time *GPS)
             }         
         }  
 } 
+void gps_parse(char *line1,char *line2,GPS_INFO *GPS)  
+{  
+    int i,tmp,start,end;  
+    char* buf=line1;  
+    char* buff=line2;  
+    GPS->D.hour   =(buf[ 7]-'0')*10+(buf[ 8]-'0');  
+    GPS->D.minute =(buf[ 9]-'0')*10+(buf[10]-'0');  
+    GPS->D.second =(buf[11]-'0')*10+(buf[12]-'0');  
+    
+    tmp = getcomma(9,buf);       
+    GPS->D.day    =(buf[tmp+0]-'0')*10+(buf[tmp+1]-'0');  
+    GPS->D.month  =(buf[tmp+2]-'0')*10+(buf[tmp+3]-'0');  
+    GPS->D.year   =(buf[tmp+4]-'0')*10+(buf[tmp+5]-'0')+2000;  
+    
+    GPS->status   =buf[getcomma(2,buf)];     
+    GPS->latitude =get_double_number(&buf[getcomma(3,buf)])/100;  
+    GPS->NS       =buf[getcomma(4,buf)];              
+    GPS->longitude=get_double_number(&buf[getcomma(5,buf)])/100;  
+    GPS->EW       =buf[getcomma(6,buf)];            
+    
+    UTC2BTC(&GPS->D);                       
+ 
+    GPS->high     = get_double_number(&buff[getcomma(9,buff)]);   
+}  
 
