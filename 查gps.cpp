@@ -27,7 +27,7 @@ typedef struct{
 }GPS_INFO;
 int open_dev(char *dev)
 {
-    int fd = open( dev, O_RDWR| O_NDELAY );          
+    int fd = open( dev, O_RDWR|O_NDELAY );          
     if (-1 == fd)
     {
         perror("Can't Open Serial Port !");
@@ -235,6 +235,27 @@ void gps_parse(char *line1,char *line2,GPS_INFO *GPS)
     
     UTC2BTC(&GPS->D);                       
  
-    GPS->high     = get_double_number(&buff[getcomma(9,buff)]);   
+    GPS->high     = get_double_number(&buff[getcomma(9,buff)]);
+	   
 }  
+void show_gps(GPS_INFO *GPS) 
+{   
+    printf("\n");
+    printf("DATE     : %ld-%02d-%02d \n",GPS->D.year,GPS->D.month,GPS->D.day);  
+    printf("TIME     : %02d:%02d:%02d \n",GPS->D.hour,GPS->D.minute,GPS->D.second);  
+    printf("Latitude : %4.4f %c\n",GPS->latitude,GPS->NS);     
+    printf("Longitude: %4.4f %c\n",GPS->longitude,GPS->EW);    
+    printf("high     : %4.4f \n",GPS->high);      
+    printf("STATUS   : %c\n",GPS->status);     
+} 
+int main(void)  
+{  
+    int  fd,nset1,nread;  
+    char buf[BUF_SIZE];  
+    char *buff_gprmc,*buff_gpgga;  
+    GPS_INFO GPS; 
+
+
+
+
 
