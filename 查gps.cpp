@@ -7,24 +7,23 @@
 #include<unistd.h>  
 #include<string.h>  
 #define BUF_SIZE 1024
-typedef struct{
+
     int year;
     int month;
     int day;
     int hour;
     int minute;
     int second;
-}date_time;
-typedef struct{
-     date_time D;
-     char status;       
-     double latitude;   
-     double longitude;   
-     char NS;             
-     char EW;           
-     double speed;        
-     double high;        
-}GPS_INFO;
+
+    date_time D;
+    char status;       
+    double latitude;   
+    double longitude;   
+    char NS;             
+    char EW;           
+    double speed;        
+    double high;        
+
 int open_dev(char *dev)
 {
     int fd = open( dev, O_RDWR|O_NDELAY );          
@@ -117,19 +116,6 @@ int init_serial(int fd,int nSpeed, int nBits, char nEvent, int nStop)
     
     return 0;  
 }  
-char * get_gprmc (char * buf)
-{
-    char *buff=buf;
-    char *target="$GPRMC";
-    char *p=NULL;
-                
-    if((p=strstr(buff,target))==NULL)
-    {
-        printf("No fonud the string GPRMC\n");
-        return 0;
-    }
-    return p;
-}
 char * get_gpgga (char * buf)
 {
     char *buff=buf;
