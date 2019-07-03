@@ -240,6 +240,43 @@ int main(void)
     char buf[BUF_SIZE];  
     char *buff_gprmc,*buff_gpgga;  
     GPS_INFO GPS; 
+    
+    
+    
+    
+{  
+    int  fd,nset1,nread;  
+    char buf[BUF_SIZE];  
+    char *buff_gprmc,*buff_gpgga;  
+    GPS_INFO GPS;
+    
+    fd = open_dev("/dev/ttyS1");  
+     
+    nset1 = init_serial(fd,4800, 8, 'N', 1);
+    if (nset1 == -1)  
+        exit(1);  
+  
+    while(1)  
+    {   
+        sleep(2);   
+memset(buf,0,BUF_SIZE);   
+        nread = read(fd, buf, BUF_SIZE); 
+        if (nread > 0)
+        {  
+            printf("\nGPS DATALen=%d\n",nread);   
+            buf[nread] = '\0';  
+            printf( "GPS information as follow:\n\n%s\n", buf); 
+        }  
+       
+        buff_gprmc=get_gprmc(buf);
+        buff_gpgga=get_gpgga(buf);
+        gps_parse(buff_gprmc,buff_gpgga,&GPS);
+        show_gps(&GPS) ;
+    }  
+    close(fd);  
+    return 0;  
+}  
+
 
 
 
