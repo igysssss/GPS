@@ -5,28 +5,30 @@
 #include<sys/stat.h>  
 #include<fcntl.h>  
 #include<unistd.h>  
+#include<termios.h>  
 #include<string.h>  
 #define BUF_SIZE 1024
-
+typedef struct{
     int year;
     int month;
     int day;
     int hour;
     int minute;
     int second;
-
-    date_time D;
-    char status;       
-    double latitude;   
-    double longitude;   
-    char NS;             
-    char EW;           
-    double speed;        
-    double high;        
-
+}date_time;
+typedef struct{
+     date_time D;
+     char status;       
+     double latitude;   
+     double longitude;   
+     char NS;             
+     char EW;           
+     double speed;        
+     double high;        
+}GPS_INFO;
 int open_dev(char *dev)
 {
-    int fd = open( dev, O_RDWR|O_NDELAY );          
+    int fd = open( dev, O_RDWR| O_NDELAY );          
     if (-1 == fd)
     {
         perror("Can't Open Serial Port !");
@@ -116,6 +118,19 @@ int init_serial(int fd,int nSpeed, int nBits, char nEvent, int nStop)
     
     return 0;  
 }  
+char * get_gprmc (char * buf)
+{
+    char *buff=buf;
+    char *target="$GPRMC";
+    char *p=NULL;
+                
+    if((p=strstr(buff,target))==NULL)
+    {
+        printf("No fonud the string GPRMC\n");
+        return 0;
+    }
+    return p;
+}
 char * get_gpgga (char * buf)
 {
     char *buff=buf;
@@ -199,6 +214,7 @@ static void UTC2BTC(date_time *GPS)
             }         
         }  
 } 
+
 void gps_parse(char *line1,char *line2,GPS_INFO *GPS)  
 {  
     int i,tmp,start,end;  
@@ -221,10 +237,9 @@ void gps_parse(char *line1,char *line2,GPS_INFO *GPS)
     
     UTC2BTC(&GPS->D);                       
  
-    GPS->high     = get_double_number(&buff[getcomma(9,buff)]);
-	   
-}  
-void show_gps(GPS_INFO *GPS) 
+    GPS->high     = get_double_number(&buff[getcomma(9,buff)]);   
+} 
+void show_gps(GPS_INFO *GPS)  
 {   
     printf("\n");
     printf("DATE     : %ld-%02d-%02d \n",GPS->D.year,GPS->D.month,GPS->D.day);  
@@ -233,17 +248,8 @@ void show_gps(GPS_INFO *GPS)
     printf("Longitude: %4.4f %c\n",GPS->longitude,GPS->EW);    
     printf("high     : %4.4f \n",GPS->high);      
     printf("STATUS   : %c\n",GPS->status);     
-} 
+}  
 int main(void)  
-{  
-    int  fd,nset1,nread;  
-    char buf[BUF_SIZE];  
-    char *buff_gprmc,*buff_gpgga;  
-    GPS_INFO GPS; 
-    
-    
-    
-    
 {  
     int  fd,nset1,nread;  
     char buf[BUF_SIZE];  
