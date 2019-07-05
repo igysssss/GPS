@@ -5,6 +5,7 @@
 #include<sys/stat.h>  
 #include<fcntl.h>  
 #include<unistd.h>  
+#include<termios.h>  
 #include<string.h>  
 #define BUF_SIZE 1024
 typedef struct{
@@ -102,7 +103,21 @@ int init_serial(int fd,int nSpeed, int nBits, char nEvent, int nStop)
         cfsetospeed(&newtio, B9600);  
         break;  
     }  
+    if( nStop == 1 )  
+        newtio.c_cflag &=  ~CSTOPB;  
+    else if ( nStop == 2 )  
+    newtio.c_cflag |=  CSTOPB;  
+    newtio.c_cc[VTIME]  = 0;  
+    newtio.c_cc[VMIN] = 100; 
+    tcflush(fd,TCIFLUSH);  
+    if((tcsetattr(fd,TCSANOW,&newtio))!=0)  
+    {  
+        perror("com set error");  
+        return -1;  
+    }  
     
+    return 0;  
+}  
 char * get_gprmc (char * buf)
 {
     char *buff=buf;
@@ -267,9 +282,4 @@ memset(buf,0,BUF_SIZE);
     close(fd);  
     return 0;  
 }  
-
-
-
-
-
 
